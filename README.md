@@ -7,7 +7,7 @@ The standard usecase for this porgram is to start it with default values and see
 $ wmstatusd &
 ```
 
-To show only a subset of the available modules or reorder them the desired module names may be given to the command as a space-separated list:
+To show only a subset of the available modules or reorder them, the desired module names may be given to the command as a space-separated list to overwrite the default configuration:
 ```
 $ wmstatusd date time battery &
 ```
