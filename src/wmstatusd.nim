@@ -12,14 +12,16 @@ import std / [
     osproc,
 ]
 
-import cligen
+import utils / [
+  sleeputils,
+  locales
+]
 
-import
-  utils/sleeputils,
-  locales/de
+import cligen
 
 
 const
+  myLocale = localeDe
   delay = initDuration(milliseconds = 500)                                      ## Delay for failing system calls to retry
 
 
@@ -56,12 +58,12 @@ procs[date] = proc(colors: Colors) {.thread.} =
     dtime_end.second = 0
     dtime_end.minute = 0
     dtime_end.hour = 0
-    date_str = fmt"""Date: {colors[white]}{dtime_start.format("ddd dd'.'MM'.'yyyy", locale)}{colors[reset]}"""
+    date_str = fmt"""Date: {colors[white]}{dtime_start.format("ddd dd'.'MM'.'yyyy", myLocale)}{colors[reset]}"""
 
     withLock mutex[date]:
       data[date] = date_str
 
-    sleep (dtime_end - dtime_start).min(timeout).inMilliseconds + 1
+    sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
     
 
 procs[time] = proc(colors: Colors) {.thread.} =
@@ -78,7 +80,7 @@ procs[time] = proc(colors: Colors) {.thread.} =
     withLock mutex[time]:
       data[time] = time_str
 
-    sleep (dtime_end - dtime_start).min(timeout).inMilliseconds + 1
+    sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
 
 
 procs[battery] = proc(colors: Colors) {.thread.} =
