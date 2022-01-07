@@ -2,14 +2,19 @@
 Daemon to show status information in the bar of some Window Manager like dwm or nimdow
 
 ## Usage
-The standard usecase for this porgram is to start it with default values and see the informations in the windowmanagers bar:
+The standard usecase for this porgram is to start it with default values and see the informations in the window managers bar:
+```
+$ wmstatusd
+```
+It is recommended to start this program as background process:
 ```
 $ wmstatusd &
 ```
 
+
 To show only a subset of the available modules or reorder them, the desired module names may be given to the command as a space-separated list to overwrite the default configuration:
 ```
-$ wmstatusd date time battery &
+$ wmstatusd date time battery
 ```
 The modules currently available are:
  - `time`
@@ -20,14 +25,15 @@ The modules currently available are:
  - `cpu`
  - `battery`
 
+
 There are some further command line options:
 ```
-  -h, --help        prints help message
-  -n, --nocolors    disables colors. 
-  -p, --padding=    set costume right padding between the 
-                    information modules
-  -r, --removeTag=  remove tags from module list to display
-  -d, --debug       redirect program output to stdout
+-h, --help        prints help message
+-n, --nocolors    disables colors
+-p, --padding=    set costume right padding between the
+                  information modules
+-r, --removeTag=  remove tags from module list to display
+-d, --debug       redirect program output to stdout
 ```
 
 ## Installation
