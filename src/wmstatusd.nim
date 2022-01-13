@@ -36,18 +36,21 @@ type
 
   Colors = array[Color, string] ## Array-type mapping color names to escape sequences (strings)
 
+  ThreadArg = tuple
+    colors: Colors
+    channel: ptr Channel[string]
+
 
 var
   colors: Colors
   tags: seq[Tag]
-  data: SharedTable[Tag, string]    # TODO (?): migrate to shared array or omit in favour of channels
-  newData: Table[Tag, string]
-  procs: Table[Tag, proc(colors: Colors) {.thread.}]
-  threads: array[Tag, Thread[Colors]]
-  mutex: array[Tag, Lock]
+  data: array[Tag, string]
+  procs: Table[Tag, proc(arg: ThreadArg) {.thread.}]
+  threads: array[Tag, Thread[ThreadArg]]
+  channels: ptr array[Tag, Channel[string]]
 
 
-procs[date] = proc(colors: Colors) {.thread.} =
+procs[date] = proc(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(minutes = 5)
   var date_str: string
   var dtime_start, dtime_end: DateTime
@@ -58,15 +61,14 @@ procs[date] = proc(colors: Colors) {.thread.} =
     dtime_end.second = 0
     dtime_end.minute = 0
     dtime_end.hour = 0
-    date_str = fmt"""Date: {colors[white]}{dtime_start.format("ddd dd'.'MM'.'yyyy", myLocale)}{colors[reset]}"""
+    date_str = fmt"""Date: {arg.colors[white]}{dtime_start.format("ddd dd'.'MM'.'yyyy", myLocale)}{arg.colors[reset]}"""
 
-    withLock mutex[date]:
-      data[date] = date_str
+    arg.channel[].send(date_str)
 
     sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
     
 
-procs[time] = proc(colors: Colors) {.thread.} =
+procs[time] = proc(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(seconds = 15)
   var time_str: string
   var dtime_start, dtime_end: DateTime
@@ -75,15 +77,14 @@ procs[time] = proc(colors: Colors) {.thread.} =
     dtime_end = dtime_start + initDuration(minutes = 1)
     dtime_end.nanosecond = 0
     dtime_end.second = 0
-    time_str = fmt"""Time: {colors[white]}{dtime_start.format("HH:mm")}{colors[reset]}"""
+    time_str = fmt"""Time: {arg.colors[white]}{dtime_start.format("HH:mm")}{arg.colors[reset]}"""
 
-    withLock mutex[time]:
-      data[time] = time_str
+    arg.channel[].send(time_str)
 
     sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
 
 
-procs[battery] = proc(colors: Colors) {.thread.} =
+procs[battery] = proc(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(seconds = 5) 
   while true:
     let battery_level = readFile("/sys/class/power_supply/BAT0/capacity").strip
@@ -91,22 +92,21 @@ procs[battery] = proc(colors: Colors) {.thread.} =
     var bat_str = "Bat: "
     case battery_status.toLower:
       of "discharging":
-        bat_str &= fmt"{colors[red]}v"
+        bat_str &= fmt"{arg.colors[red]}v"
       of "charging":
-        bat_str &= fmt"{colors[green]}^"
+        bat_str &= fmt"{arg.colors[green]}^"
       of "full", "not charging":
-        bat_str &= fmt"{colors[green]}="
+        bat_str &= fmt"{arg.colors[green]}="
       else:
-        bat_str &= fmt"{colors[yellow]}>"
-    bat_str &= fmt"{battery_level}%{colors[reset]}"
+        bat_str &= fmt"{arg.colors[yellow]}>"
+    bat_str &= fmt"{battery_level}%{arg.colors[reset]}"
 
-    withLock mutex[battery]:
-      data[battery] = bat_str
+    arg.channel[].send(bat_str)
 
     sleep timeout
 
 
-procs[cpu] = proc(colors: Colors) {.thread.} =
+procs[cpu] = proc(arg: ThreadArg) {.thread.} =
   # TODO (?): get CPU-Usage
   let timeout = initDuration(seconds = 3)
   var zones: int
@@ -129,35 +129,33 @@ procs[cpu] = proc(colors: Colors) {.thread.} =
     let temp = readFile(fmt"/sys/class/thermal/thermal_zone{zone_nr}/temp").strip.parseInt div 1000
     var cpu_str = "CPU: "
     if temp < 65:
-      cpu_str &= colors[green]
+      cpu_str &= arg.colors[green]
     else:
-      cpu_str &= colors[red]
-    cpu_str &= fmt"{temp}°C{colors[reset]}"
+      cpu_str &= arg.colors[red]
+    cpu_str &= fmt"{temp}°C{arg.colors[reset]}"
 
-    withLock mutex[cpu]:
-      data[cpu] = cpu_str
+    arg.channel[].send(cpu_str)
 
     sleep timeout
 
 
-procs[pkgs] = proc(colors: Colors) {.thread.} =
+procs[pkgs] = proc(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(seconds = 20)
   var fileName = "/tmp/available-updates.txt"
   while true:
-    var pkgs_str = fmt"Pkgs: {colors[cyan]}"
+    var pkgs_str = fmt"Pkgs: {arg.colors[cyan]}"
     if fileName.fileExists and fileName.getFileSize() > 0:
       let updates_count = readFile(fileName).strip.splitLines.len
-      pkgs_str &= fmt"{updates_count}{colors[reset]}"
+      pkgs_str &= fmt"{updates_count}{arg.colors[reset]}"
     else:
-      pkgs_str &= fmt"0{colors[reset]}"
+      pkgs_str &= fmt"0{arg.colors[reset]}"
 
-    withLock mutex[pkgs]:
-      data[pkgs] = pkgs_str
+    arg.channel[].send(pkgs_str)
 
     sleep timeout
 
 
-procs[backlight] = proc(colors: Colors) {.thread.} =
+procs[backlight] = proc(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(milliseconds = 250)
   var backlight_str: string
   var bldevice: string
@@ -173,15 +171,14 @@ procs[backlight] = proc(colors: Colors) {.thread.} =
   
   while true:
     actual_brightness = readFile("/sys/class/backlight/" / bldevice / "actual_brightness").strip.parseInt
-    backlight_str = fmt"BL: {colors[yellow]}{(actual_brightness * 100) div max_brightness}%{colors[reset]}"
+    backlight_str = fmt"BL: {arg.colors[yellow]}{(actual_brightness * 100) div max_brightness}%{arg.colors[reset]}"
 
-    withLock mutex[battery]:
-      data[backlight] = backlight_str
+    arg.channel[].send(backlight_str)
 
     sleep timeout
 
 
-procs[volume] = proc(colors: Colors) {.thread.} =
+procs[volume] = proc(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(milliseconds = 250)
   while true:
     var volume_info: seq[string]
@@ -213,16 +210,15 @@ procs[volume] = proc(colors: Colors) {.thread.} =
               volumes.add(vol)
               allmute = allmute and mute
 
-      vol_str &= fmt"{colors[yellow]}"
+      vol_str &= fmt"{arg.colors[yellow]}"
       if allmute:
-        vol_str &= fmt"mute{colors[reset]}"
+        vol_str &= fmt"mute{arg.colors[reset]}"
       else:
-        vol_str &= fmt"{volumes.sum div volumes.len}%{colors[reset]}"
+        vol_str &= fmt"{volumes.sum div volumes.len}%{arg.colors[reset]}"
     except:
-      vol_str &= fmt"{colors[red]}error{colors[reset]}"
+      vol_str &= fmt"{arg.colors[red]}error{arg.colors[reset]}"
 
-    withLock mutex[volume]:
-      data[volume] = vol_str
+    arg.channel[].send(vol_str)
 
     sleep timeout
 
@@ -240,11 +236,13 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
   tags = tags.filter(tag => tag notin removeTag)
 
 
-  data.init
+  #channels = cast[ptr array[Tag, Channel[string]]] (allocShared0(Channel[string].sizeof * Tag.items.toSeq.len))
+  channels = cast[ptr array[Tag, Channel[string]]] (createShared(Channel[string], Tag.items.toSeq.len))
+
   for tag in tags.deduplicate:
     data[tag] = ""
-    initLock(mutex[tag])
-    createThread(threads[tag], procs[tag], colors)
+    channels[tag].open()
+    createThread(threads[tag], procs[tag], (colors, addr channels[tag]))
   sleep initDuration(milliseconds = 700)
 
   var str, cmd, laststr: string
@@ -259,10 +257,10 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
     str = cmd
 
     for tag in tags:
-      if tryAcquire(mutex[tag]):
-        newData[tag] = data.mget(tag)
-        release(mutex[tag])
-      str &= fmt"{newData[tag]}" & " ".repeat(padding)
+      # TODO: try recv from channels
+      while channels[tag].peek >= 1:
+        data[tag] = channels[tag].recv()
+      str &= fmt"{data[tag]}" & " ".repeat(padding)
     str &= "'"
     
     if str == laststr:
@@ -278,8 +276,12 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
 
     sleep initDuration(milliseconds = 250)
 
-  data.deinitSharedTable
+  #data.deinitSharedTable
+  for tag in tags.deduplicate:
+    channels[tag].close()
+  freeShared(channels)
 
 
 # Get Commandline options and call main function
 cligen.dispatch(wmstatusd)
+
