@@ -58,7 +58,6 @@ Make sure to include that directory into your system path.
 For explicit instructions see beginning of this section.
 
 ## Todo
- - Replace global writeback variables by using channels (ipc)
  - Restructure Code
  - Replace all system calls by internal solutions
  - Use NimScript configuration file
