@@ -42,7 +42,7 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
   tags = tags.filter(tag => tag notin removeTag)
 
 
-  #channels = cast[ptr array[Tag, Channel[string]]] (allocShared0(Channel[string].sizeof * Tag.items.toSeq.len))
+  # allocate non-GC-ed shared memory for channels
   channels = cast[ptr array[Tag, Channel[string]]] (createShared(Channel[string], Tag.items.toSeq.len))
 
   for tag in tags.deduplicate:
