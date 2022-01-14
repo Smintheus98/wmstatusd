@@ -1,10 +1,10 @@
 import std/[os, times]
 
 
-template sleep*(ms: int64) =
+proc sleep*(ms: int64) =
   sleep ms.int
 
-template sleep*(duration: Duration) =
+proc sleep*(duration: Duration) =
   sleep duration.inMilliseconds
 
 

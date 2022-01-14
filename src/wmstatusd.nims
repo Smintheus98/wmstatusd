@@ -1,4 +1,3 @@
-switch("threads", "on")
 switch("d", "release")
 
 # TODO: use arc-gc
