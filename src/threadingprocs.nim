@@ -1,6 +1,7 @@
 import std / [
     strformat,
     strutils,
+    sequtils,
     times,
     math,
     os,
@@ -12,11 +13,7 @@ import defs, utils / [
   locales
 ]
 
-
-const
-  myLocale = localeDe
-
-
+const myLocale = localeDe
 
 proc getDate*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(minutes = 5)
@@ -32,7 +29,6 @@ proc getDate*(arg: ThreadArg) {.thread.} =
     date_str = fmt"""Date: {arg.colors[CWHITE]}{dtime_start.format("ddd dd'.'MM'.'yyyy", myLocale)}{arg.colors[CRESET]}"""
 
     arg.channel[].send(date_str)
-
     sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
     
 
@@ -48,15 +44,21 @@ proc getTime*(arg: ThreadArg) {.thread.} =
     time_str = fmt"""Time: {arg.colors[CWHITE]}{dtime_start.format("HH:mm")}{arg.colors[CRESET]}"""
 
     arg.channel[].send(time_str)
-
     sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
 
 
 proc getBattery*(arg: ThreadArg) {.thread.} =
-  let timeout = initDuration(seconds = 5) 
+  let
+    timeout = initDuration(seconds = 5)
+    battery_names = walkPattern("/sys/class/power_supply/BAT*").toSeq
+  if battery_names.len == 0:
+    return
+  let battery_name = battery_names[0]
+
   while true:
-    let battery_level = readFile("/sys/class/power_supply/BAT0/capacity").strip
-    let battery_status = readFile("/sys/class/power_supply/BAT0/status").strip
+    let
+      battery_level = readFile(battery_name / "capacity").strip
+      battery_status = readFile(battery_name / "status").strip
     var bat_str = "Bat: "
     case battery_status.toLower:
       of "discharging":
@@ -70,31 +72,25 @@ proc getBattery*(arg: ThreadArg) {.thread.} =
     bat_str &= fmt"{battery_level}%{arg.colors[CRESET]}"
 
     arg.channel[].send(bat_str)
-
     sleep timeout
 
 
 proc getCPU*(arg: ThreadArg) {.thread.} =
   # TODO (?): get CPU-Usage
-  let timeout = initDuration(seconds = 3)
-  var zones: int
-  while true:
-    try:
-      # TODO: use language features instead of `execCmdEx`
-      zones = "ls /sys/class/thermal | grep thermal_zone | wc -l".execCmdEx.output.strip.parseInt
-      break
-    except:
-      sleep delay500
-      continue
+  let
+    timeout = initDuration(seconds = 3)
+    zones = walkPattern("/sys/class/thermal/thermal_zone*").toSeq
+  var zone: string
 
-  var zone_nr: int
-  for i in 0..<zones:
-    var zone_type = readFile(fmt"/sys/class/thermal/thermal_zone{i}/type").strip
-    if zone_type == "x86_pkg_temp":
-      zone_nr = i
+  for z in zones:
+    if readFile(z / "type").strip == "x86_pkg_temp":
+      zone = z
       break
+  if zone == "":
+    return
+
   while true:
-    let temp = readFile(fmt"/sys/class/thermal/thermal_zone{zone_nr}/temp").strip.parseInt div 1000
+    let temp = readFile(zone / "temp").strip.parseInt div 1000
     var cpu_str = "CPU: "
     if temp < 65:
       cpu_str &= arg.colors[CGREEN]
@@ -103,7 +99,6 @@ proc getCPU*(arg: ThreadArg) {.thread.} =
     cpu_str &= fmt"{temp}°C{arg.colors[CRESET]}"
 
     arg.channel[].send(cpu_str)
-
     sleep timeout
 
 
@@ -119,15 +114,15 @@ proc getPkgs*(arg: ThreadArg) {.thread.} =
       pkgs_str &= fmt"0{arg.colors[CRESET]}"
 
     arg.channel[].send(pkgs_str)
-
     sleep timeout
 
 
 proc getBacklight*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(milliseconds = 250)
-  var backlight_str: string
-  var bldevice: string
-  var actual_brightness, max_brightness: int
+  var
+    backlight_str: string
+    bldevice: string
+    actual_brightness, max_brightness: int
   while true:
     try:
       bldevice = "ls /sys/class/backlight | grep backlight".execCmdEx.output.strip.split[0]
