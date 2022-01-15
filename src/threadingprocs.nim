@@ -118,26 +118,23 @@ proc getPkgs*(arg: ThreadArg) {.thread.} =
 
 
 proc getBacklight*(arg: ThreadArg) {.thread.} =
-  let timeout = initDuration(milliseconds = 250)
+  let
+    timeout = initDuration(milliseconds = 250)
+    bldevices = walkPattern("/sys/class/backlight/*").toSeq
+  if bldevices.len == 0:
+    return
   var
     backlight_str: string
-    bldevice: string
+    bldevice = bldevices[0]
     actual_brightness, max_brightness: int
-  while true:
-    try:
-      bldevice = "ls /sys/class/backlight | grep backlight".execCmdEx.output.strip.split[0]
-      break
-    except:
-      sleep delay500
-      continue
-  max_brightness = readFile("/sys/class/backlight/" / bldevice / "max_brightness").strip.parseInt
+
+  max_brightness = readFile(bldevice / "max_brightness").strip.parseInt
   
   while true:
-    actual_brightness = readFile("/sys/class/backlight/" / bldevice / "actual_brightness").strip.parseInt
+    actual_brightness = readFile(bldevice / "actual_brightness").strip.parseInt
     backlight_str = fmt"BL: {arg.colors[CYELLOW]}{(actual_brightness * 100) div max_brightness}%{arg.colors[CRESET]}"
 
     arg.channel[].send(backlight_str)
-
     sleep timeout
 
 
@@ -182,5 +179,4 @@ proc getVolume*(arg: ThreadArg) {.thread.} =
       vol_str &= fmt"{arg.colors[CRED]}error{arg.colors[CRESET]}"
 
     arg.channel[].send(vol_str)
-
     sleep timeout
