@@ -13,6 +13,8 @@ import defs, utils / [
   locales
 ]
 
+import bindings/amixer
+
 const myLocale = localeDe
 
 proc getDate*(arg: ThreadArg) {.thread.} =
@@ -140,43 +142,23 @@ proc getBacklight*(arg: ThreadArg) {.thread.} =
 
 proc getVolume*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(milliseconds = 250)
+  var mixer = initMixer()
   while true:
-    var volume_info = newSeq[string]()
-    try:
-      # TODO: Use systemfiles or internal structures
-      volume_info = "amixer get Master".execCmdEx.output.strip.splitLines
-    except:
-      sleep delay500
-      continue
-    var channels = newSeq[string]()
-    var volumes = newSeq[int]()
-    var allmute = true
-
-    var vol_str = fmt"Vol: "
-    try:
-      for line in volume_info:
-        # Extract required information
-        # Pretty over fitted: probably requires future adaption when `amixer` changes
-        let l = line.strip.toLower
-        if l.startsWith("playback channels"):
-          for channel in l.split(':')[1].split('-'):
-            channels.add(channel.strip)
-        else:
-          for channel in channels:
-            if l.startsWith(channel):
-              let 
-                vol = l.split[4].strip(chars={'[','%',']'}).parseInt
-                mute = l.split[5].strip(chars={'[',']'}) == "off"
-              volumes.add(vol)
-              allmute = allmute and mute
-
-      vol_str &= fmt"{arg.colors[CYELLOW]}"
-      if allmute:
-        vol_str &= fmt"mute{arg.colors[CRESET]}"
-      else:
-        vol_str &= fmt"{volumes.sum div volumes.len}%{arg.colors[CRESET]}"
-    except:
+    if not mixer.update():
+      break
+    var
+      volume = mixer.getVolume()
+      muted = mixer.isMuted()
+      vol_str = fmt"Vol: "
+    vol_str &= fmt"{arg.colors[CYELLOW]}"
+    if muted:
+      vol_str &= fmt"mute{arg.colors[CRESET]}"
+    elif volume >= -1:
+      vol_str &= fmt"{volume}%{arg.colors[CRESET]}"
+    else:
       vol_str &= fmt"{arg.colors[CRED]}error{arg.colors[CRESET]}"
 
     arg.channel[].send(vol_str)
     sleep timeout
+  mixer.deinit()
+
