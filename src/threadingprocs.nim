@@ -3,17 +3,11 @@ import std / [
     strutils,
     sequtils,
     times,
-    math,
     os,
-    osproc,
 ]
 
-import defs, utils / [
-  sleeputils,
-  locales
-]
+import defs, bindings/amixer, utils/[sleeputils, locales]
 
-import bindings/amixer
 
 const myLocale = localeDe
 
@@ -143,18 +137,18 @@ proc getBacklight*(arg: ThreadArg) {.thread.} =
 proc getVolume*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(milliseconds = 250)
   var mixer = initMixer()
+  if not mixer.good:
+    return
   while true:
     if not mixer.update():
       break
-    var
-      volume = mixer.getVolume()
-      muted = mixer.isMuted()
-      vol_str = fmt"Vol: "
-    vol_str &= fmt"{arg.colors[CYELLOW]}"
-    if muted:
-      vol_str &= fmt"mute{arg.colors[CRESET]}"
-    elif volume >= -1:
-      vol_str &= fmt"{volume}%{arg.colors[CRESET]}"
+    let volume = mixer.getVolume()
+    var vol_str = fmt"Vol: "
+
+    if mixer.isMuted():
+      vol_str &= fmt"{arg.colors[CYELLOW]}mute{arg.colors[CRESET]}"
+    elif volume >= 0:
+      vol_str &= fmt"{arg.colors[CYELLOW]}{volume}%{arg.colors[CRESET]}"
     else:
       vol_str &= fmt"{arg.colors[CRED]}error{arg.colors[CRESET]}"
 
