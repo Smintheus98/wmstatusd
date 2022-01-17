@@ -64,7 +64,7 @@ proc test_advanced() =
     if not mixer.update:
       break
     echo &"Volume: {mixer.getVolume}"
-    echo &"Muted: {mixer.isMute}"
+    echo &"Muted: {mixer.isMuted}"
     sleep(250)
   mixer.deinit
 
