@@ -141,7 +141,7 @@ proc getBacklight*(arg: ThreadArg) {.thread.} =
 proc getVolume*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(milliseconds = 250)
   while true:
-    var volume_info: seq[string]
+    var volume_info = newSeq[string]()
     try:
       # TODO: Use systemfiles or internal structures
       volume_info = "amixer get Master".execCmdEx.output.strip.splitLines
