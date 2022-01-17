@@ -37,6 +37,7 @@ proc snd_mixer_selem_id_free*(obj: ptr snd_mixer_selem_id)
 proc snd_mixer_selem_id_set_name*(obj: ptr snd_mixer_selem_id; val: cstring) 
 proc snd_mixer_selem_id_set_index*(obj: ptr snd_mixer_selem_id; val: cuint) 
 
+proc snd_mixer_handle_events*(mixer: ptr snd_mixer): cint
 proc snd_mixer_attach*(mixer: ptr snd_mixer; name: cstring): cint 
 
 proc snd_mixer_load*(mixer: ptr snd_mixer): cint 
@@ -58,7 +59,6 @@ proc snd_mixer_selem_get_playback_volume*(elem: ptr snd_mixer_elem; channel: snd
 #[
 proc snd_mixer_first_elem*(mixer: ptr snd_mixer): ptr snd_mixer_elem {.cdecl, importc: "snd_mixer_first_elem", dynlib: asound.}
 proc snd_mixer_last_elem*(mixer: ptr snd_mixer): ptr snd_mixer_elem {.cdecl, importc: "snd_mixer_last_elem", dynlib: asound.}
-proc snd_mixer_handle_events*(mixer: ptr snd_mixer): cint {.cdecl, importc: "snd_mixer_handle_events", dynlib: asound.}
 proc snd_mixer_attach_hctl*(mixer: ptr snd_mixer; hctl: ptr snd_hctl_t): cint {.cdecl, importc: "snd_mixer_attach_hctl", dynlib: asound.}
 proc snd_mixer_detach_hctl*(mixer: ptr snd_mixer; hctl: ptr snd_hctl_t): cint {.cdecl, importc: "snd_mixer_detach_hctl", dynlib: asound.}
 proc snd_mixer_get_hctl*(mixer: ptr snd_mixer; name: cstring; hctl: ptr ptr snd_hctl_t): cint {.cdecl, importc: "snd_mixer_get_hctl", dynlib: asound.}

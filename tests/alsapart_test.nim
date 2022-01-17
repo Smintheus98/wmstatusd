@@ -60,23 +60,13 @@ proc test_advanced() =
   var mixer: Mixer = initMixer()
   if not mixer.good:
     quit QuitFailure
-  for i in 0..<5:
-    var vol = mixer.getVolume
-    var mute = mixer.isMute
-    echo &"Volume: {vol}"
-    echo &"Muted: {mute}"
-    sleep(500)
+  for i in 0..<50000:
+    if not mixer.update:
+      break
+    echo &"Volume: {mixer.getVolume}"
+    echo &"Muted: {mixer.isMute}"
+    sleep(250)
   mixer.deinit
-
-  mixer.init
-  if not mixer.good:
-    quit QuitFailure
-  for i in 0..<5:
-    var vol = mixer.getVolume
-    var mute = mixer.isMute
-    echo &"Volume: {vol}"
-    echo &"Muted: {mute}"
-    sleep(500)
 
 
 echo "1: Classical Test: (imperative)"
