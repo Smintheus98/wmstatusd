@@ -90,3 +90,8 @@ proc getVolume*(mixer: Mixer; channel = SND_MIXER_SCHN_FRONT_LEFT): int =
     return -1
   return ((volume-mixer.volmin) / (mixer.volmax-mixer.volmin) * 100).int
 
+
+proc getFreshVolume(mixer: var Mixer; channel = SND_MIXER_SCHN_FRONT_LEFT): int =
+  if not mixer.update():
+    return -1
+  return mixer.getVolume()
