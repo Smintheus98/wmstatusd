@@ -88,7 +88,7 @@ proc getVolume*(mixer: Mixer; channel = SND_MIXER_SCHN_FRONT_LEFT): int =
   var volume: clong
   if snd_mixer_selem_get_playback_volume(mixer.elem, channel, addr volume) < 0:
     return -1
-  return ((volume-mixer.volmin) / (mixer.volmax-mixer.volmin) * 100).int
+  return (((volume-mixer.volmin) * 100) / (mixer.volmax-mixer.volmin) + 0.5).int
 
 
 proc getFreshVolume(mixer: var Mixer; channel = SND_MIXER_SCHN_FRONT_LEFT): int =
