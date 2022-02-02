@@ -5,8 +5,9 @@ author        = "Yannic Kitten"
 description   = "Status daemon for window managers"
 license       = "GPL-3.0"
 srcDir        = "src"
-binDir        = "bin"
-bin           = @["wmstatusd"]
+when not defined(depsOnly):
+  binDir        = "bin"
+  bin           = @["wmstatusd"]
 
 
 # Dependencies
