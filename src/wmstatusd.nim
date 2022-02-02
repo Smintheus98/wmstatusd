@@ -3,12 +3,11 @@ import std / [
     strutils,
     sequtils,
     sugar,
-    osproc,
 ]
 
 import defs, threadingprocs, utils/sleeputils
 
-import cligen
+import cligen, x11/xlib
 
 
 var
@@ -51,41 +50,33 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
     createThread(threads[tag], tprocs[tag], (colors, addr channels[tag]))
   sleep delay700
 
-  var str, cmd, laststr: string
+  var
+    dpy: PDisplay = XOpenDisplay(nil)
+    status, laststatus: string
 
   if debug:
     echo fmt"Tags: {tags} ({tags.len}), Threads: {tags.deduplicate.len} (+1)"
-    cmd = "echo -e ' "
-  else:
-    cmd = "xsetroot -name ' "
 
   while true:
-    str = cmd
-
+    status = " "
     for tag in tags:
       while channels[tag].peek >= 1:
         data[tag] = channels[tag].recv()
-      str &= fmt"{data[tag]}" & " ".repeat(padding)
-    str &= "'"
+      status &= fmt"{data[tag]}" & " ".repeat(padding)
     
-    if str == laststr:
-      # reduces system calls
-      sleep delay250
-      continue
-
-    try:
-      discard str.execCmd
-      laststr = str
-    except:
-      discard
+    if status != laststatus:
+      if debug:
+        echo status
+      else:
+        discard XStoreName(dpy, DefaultRootWindow(dpy), status.cstring)
+        discard XFlush(dpy)
+      laststatus = status
 
     sleep delay250
 
-  #data.deinitSharedTable
   for tag in tags.deduplicate:
     channels[tag].close()
   freeShared(channels)
-
 
 # Get Commandline options and call main function
 cligen.dispatch(wmstatusd)

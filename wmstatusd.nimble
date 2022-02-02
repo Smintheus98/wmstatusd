@@ -14,3 +14,4 @@ when not defined(depsOnly):
 
 requires "nim >= 1.6.2"
 requires "cligen"
+requires "x11"
