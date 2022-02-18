@@ -22,7 +22,7 @@ proc getDate*(arg: ThreadArg) {.thread.} =
     dtime_end.second = 0
     dtime_end.minute = 0
     dtime_end.hour = 0
-    date_str = fmt"""Date: {arg.colors[CWHITE]}{dtime_start.format("ddd dd'.'MM'.'yyyy", myLocale)}{arg.colors[CRESET]}"""
+    date_str = fmt"""Date: {arg.colormap[CWHITE]}{dtime_start.format("ddd dd'.'MM'.'yyyy", myLocale)}{arg.colormap[CRESET]}"""
 
     arg.channel[].send(date_str)
     sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
@@ -37,7 +37,7 @@ proc getTime*(arg: ThreadArg) {.thread.} =
     dtime_end = dtime_start + initDuration(minutes = 1)
     dtime_end.nanosecond = 0
     dtime_end.second = 0
-    time_str = fmt"""Time: {arg.colors[CWHITE]}{dtime_start.format("HH:mm")}{arg.colors[CRESET]}"""
+    time_str = fmt"""Time: {arg.colormap[CWHITE]}{dtime_start.format("HH:mm")}{arg.colormap[CRESET]}"""
 
     arg.channel[].send(time_str)
     sleep min(dtime_end - dtime_start, timeout).inMilliseconds + 1
@@ -58,14 +58,14 @@ proc getBattery*(arg: ThreadArg) {.thread.} =
     var bat_str = "Bat: "
     case battery_status.toLower:
       of "discharging":
-        bat_str &= fmt"{arg.colors[CRED]}v"
+        bat_str &= fmt"{arg.colormap[CRED]}v"
       of "charging":
-        bat_str &= fmt"{arg.colors[CGREEN]}^"
+        bat_str &= fmt"{arg.colormap[CGREEN]}^"
       of "full", "not charging":
-        bat_str &= fmt"{arg.colors[CGREEN]}="
+        bat_str &= fmt"{arg.colormap[CGREEN]}="
       else:
-        bat_str &= fmt"{arg.colors[CYELLOW]}>"
-    bat_str &= fmt"{battery_level}%{arg.colors[CRESET]}"
+        bat_str &= fmt"{arg.colormap[CYELLOW]}>"
+    bat_str &= fmt"{battery_level}%{arg.colormap[CRESET]}"
 
     arg.channel[].send(bat_str)
     sleep timeout
@@ -89,10 +89,10 @@ proc getCPU*(arg: ThreadArg) {.thread.} =
     let temp = readFile(zone / "temp").strip.parseInt div 1000
     var cpu_str = "CPU: "
     if temp < 65:
-      cpu_str &= arg.colors[CGREEN]
+      cpu_str &= arg.colormap[CGREEN]
     else:
-      cpu_str &= arg.colors[CRED]
-    cpu_str &= fmt"{temp}°C{arg.colors[CRESET]}"
+      cpu_str &= arg.colormap[CRED]
+    cpu_str &= fmt"{temp}°C{arg.colormap[CRESET]}"
 
     arg.channel[].send(cpu_str)
     sleep timeout
@@ -102,12 +102,12 @@ proc getPkgs*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(seconds = 20)
   var fileName = "/tmp/available-updates.txt"
   while true:
-    var pkgs_str = fmt"Pkgs: {arg.colors[CCYAN]}"
+    var pkgs_str = fmt"Pkgs: {arg.colormap[CCYAN]}"
     if fileName.fileExists and fileName.getFileSize() > 0:
       let updates_count = readFile(fileName).strip.splitLines.len
-      pkgs_str &= fmt"{updates_count}{arg.colors[CRESET]}"
+      pkgs_str &= fmt"{updates_count}{arg.colormap[CRESET]}"
     else:
-      pkgs_str &= fmt"0{arg.colors[CRESET]}"
+      pkgs_str &= fmt"0{arg.colormap[CRESET]}"
 
     arg.channel[].send(pkgs_str)
     sleep timeout
@@ -128,7 +128,7 @@ proc getBacklight*(arg: ThreadArg) {.thread.} =
   
   while true:
     actual_brightness = readFile(bldevice / "actual_brightness").strip.parseInt
-    backlight_str = fmt"BL: {arg.colors[CYELLOW]}{(actual_brightness * 100) div max_brightness}%{arg.colors[CRESET]}"
+    backlight_str = fmt"BL: {arg.colormap[CYELLOW]}{(actual_brightness * 100) div max_brightness}%{arg.colormap[CRESET]}"
 
     arg.channel[].send(backlight_str)
     sleep timeout
@@ -146,11 +146,11 @@ proc getVolume*(arg: ThreadArg) {.thread.} =
     var vol_str = fmt"Vol: "
 
     if mixer.isMuted():
-      vol_str &= fmt"{arg.colors[CYELLOW]}mute{arg.colors[CRESET]}"
+      vol_str &= fmt"{arg.colormap[CYELLOW]}mute{arg.colormap[CRESET]}"
     elif volume >= 0:
-      vol_str &= fmt"{arg.colors[CYELLOW]}{volume}%{arg.colors[CRESET]}"
+      vol_str &= fmt"{arg.colormap[CYELLOW]}{volume}%{arg.colormap[CRESET]}"
     else:
-      vol_str &= fmt"{arg.colors[CRED]}error{arg.colors[CRESET]}"
+      vol_str &= fmt"{arg.colormap[CRED]}error{arg.colormap[CRESET]}"
 
     arg.channel[].send(vol_str)
     sleep timeout
