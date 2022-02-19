@@ -8,12 +8,12 @@ type Color* = enum
   ## Color names for indexing to actual escape sequence
   CBLACK, CRED, CGREEN, CYELLOW, CBLUE, CMAGENTA, CCYAN, CWHITE, CRESET
 
-type Colors* = array[Color, string] ## Array-type mapping color names to escape sequences (strings)
+type ColorMap* = array[Color, string] ## Array-type mapping color names to escape sequences (strings)
 
 type ThreadArg* = tuple
   ## Data structure to bundle arguments for thread procedures
   ## which can have only one parameter
-  colors: Colors
+  colormap: ColorMap
   channel: ptr Channel[string]
 
 const

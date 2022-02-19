@@ -5,13 +5,13 @@ import std / [
     sugar,
 ]
 
-import defs, threadingprocs, utils/sleeputils
+import wmstatusd / [defs, threadingprocs, sleeputils]
 
 import cligen, x11/xlib
 
 
 var
-  colors: Colors
+  colormap: ColorMap
   tags: seq[Tag]
   data: array[Tag, string]
   tprocs: array[Tag, proc(arg: ThreadArg) {.thread.}]
@@ -29,9 +29,9 @@ tprocs[volume]    = getVolume
 
 
 proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[Tag] = @[], debug = false) =
-  colors[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
+  colormap[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
   if nocolors:
-    colors[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
+    colormap[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
 
   tags = @[time, date, pkgs, backlight, volume, cpu, battery]
   if taglist.len != 0:
@@ -47,7 +47,7 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
   for tag in tags.deduplicate:
     data[tag] = ""
     channels[tag].open()
-    createThread(threads[tag], tprocs[tag], (colors, addr channels[tag]))
+    createThread(threads[tag], tprocs[tag], (colormap, addr channels[tag]))
   sleep delay700
 
   var
