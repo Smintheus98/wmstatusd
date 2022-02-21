@@ -6,7 +6,7 @@ import std / [
     os,
 ]
 
-import defs, sleeputils, locales, bindings/amixer
+import types/all, sleep, locales, bindings/amixer
 
 
 const myLocale = localeDe
