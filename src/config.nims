@@ -1,2 +1,6 @@
-switch("threads", "on")
-switch("passL", "-lasound")
+--threads:on
+--passL:"-lasound"
+
+when defined(cmpl):
+  --path:"$nim"
+

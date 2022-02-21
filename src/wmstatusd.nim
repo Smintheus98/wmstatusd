@@ -3,16 +3,16 @@ import std / [
     strutils,
     sequtils,
     sugar,
+    options,
 ]
 
-import defs, threadingprocs, utils/sleeputils
+import wmstatusd / [types/all, threadingprocs, sleep, configuration]
 
 import cligen, x11/xlib
 
 
 var
-  colormap: ColorMap
-  tags: seq[Tag]
+  config: Configuration
   data: array[Tag, string]
   tprocs: array[Tag, proc(arg: ThreadArg) {.thread.}]
   channels: ptr array[Tag, Channel[string]]
@@ -27,27 +27,34 @@ tprocs[pkgs]      = getPkgs
 tprocs[backlight] = getBacklight
 tprocs[volume]    = getVolume
 
+proc resetDefault(config: var Configuration) =
+  config.taglist = @[time, date, pkgs, backlight, volume, cpu, battery]
+  config.tagPadding = 1
+  config.colormap[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
+  config.useColors = true
+
 
 proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[Tag] = @[], debug = false) =
-  colormap[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
-  if nocolors:
-    colormap[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
+  config.resetDefault()
+  config.readConfig()
 
-  tags = @[time, date, pkgs, backlight, volume, cpu, battery]
+  # paramters overwriting
+  if nocolors or not config.useColors:
+    config.colormap[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
   if taglist.len != 0:
-    tags = taglist
+    config.taglist = taglist
 
   # list of only those elements in tags that are not in removeTag
-  tags = tags.filter(tag => tag notin removeTag)
+  config.taglist = config.taglist.filter(tag => tag notin removeTag)
 
 
   # allocate non-GC-ed shared memory for channels
   channels = cast[ptr array[Tag, Channel[string]]] (createShared(Channel[string], Tag.items.toSeq.len))
 
-  for tag in tags.deduplicate:
+  for tag in config.taglist.deduplicate:
     data[tag] = ""
     channels[tag].open()
-    createThread(threads[tag], tprocs[tag], (colormap, addr channels[tag]))
+    createThread(threads[tag], tprocs[tag], (config.colormap, addr channels[tag]))
   sleep delay700
 
   var
@@ -55,14 +62,14 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
     status, laststatus: string
 
   if debug:
-    echo fmt"Tags: {tags} ({tags.len}), Threads: {tags.deduplicate.len} (+1)"
+    echo fmt"Tags: {config.taglist} ({config.taglist.len}), Threads: {config.taglist.deduplicate.len} (+1)"
 
   while true:
     status = " "
-    for tag in tags:
+    for tag in config.taglist:
       while channels[tag].peek >= 1:
         data[tag] = channels[tag].recv()
-      status &= fmt"{data[tag]}" & " ".repeat(padding)
+      status &= fmt"{data[tag]}" & " ".repeat(config.tagPadding)
     
     if status != laststatus:
       if debug:
@@ -74,7 +81,7 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
 
     sleep delay250
 
-  for tag in tags.deduplicate:
+  for tag in config.taglist.deduplicate:
     channels[tag].close()
   freeShared(channels)
 
