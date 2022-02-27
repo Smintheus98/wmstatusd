@@ -75,7 +75,7 @@ An invalid configuration will prevent the program from starting.
 
 ## Todo v1.0.0:
  - [X] Replace global writeback variables by using channels (ipc)
- - [X] Remove all system calls in favour of internal soluions
+ - [X] Remove all system calls in favor of internal soluions
  - [X] Use NimScript configuration file
  - [X] Fix program to use arc garbage collector
  - [ ] Proper code documentation and functionality tests
