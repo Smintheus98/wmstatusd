@@ -100,7 +100,9 @@ proc getCPU*(arg: ThreadArg) {.thread.} =
 
 proc getPkgs*(arg: ThreadArg) {.thread.} =
   let timeout = initDuration(seconds = 20)
-  var fileName = "/tmp/available-updates.txt"
+  let fileName = "/tmp/available-updates.txt"
+  if not fileName.fileExists:
+    return
   while true:
     var pkgs_str = fmt"Pkgs: {arg.colormap[CCYAN]}"
     if fileName.fileExists and fileName.getFileSize() > 0:
