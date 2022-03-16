@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.1"
+version       = "0.2.2"
 author        = "Yannic Kitten"
 description   = "Status daemon for window managers"
 license       = "GPL-3.0"
