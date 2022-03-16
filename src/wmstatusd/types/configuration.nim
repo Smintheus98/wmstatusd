@@ -3,9 +3,11 @@ when not defined(NIMSCRIPT):
 
 type Configuration* = object
   taglist*: TagList
-  tagpadding*: int
-  colormap*: ColorMap
+  separator*: string
+  separatorColor*: Color
+  padding*: int
   useColors*: bool
+  savepower*: bool
 
 # TODO: Move to a more logically suitable place
 import macros

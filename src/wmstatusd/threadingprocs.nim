@@ -12,7 +12,9 @@ import types/all, sleep, locales, bindings/amixer
 const myLocale = localeDe
 
 proc getDate*(arg: ThreadArg) {.thread.} =
-  let timeout = initDuration(minutes = 5)
+  var timeout = initDuration(minutes = 5)
+  if arg.savepower:
+    timeout = initDuration(minutes = 30)
   var date_str: string
   var dtime_start, dtime_end: DateTime
   while true:
@@ -29,7 +31,9 @@ proc getDate*(arg: ThreadArg) {.thread.} =
     
 
 proc getTime*(arg: ThreadArg) {.thread.} =
-  let timeout = initDuration(seconds = 15)
+  var timeout = initDuration(seconds = 15)
+  if arg.savepower:
+    timeout = initDuration(seconds = 30)
   var time_str: string
   var dtime_start, dtime_end: DateTime
   while true:
@@ -44,9 +48,10 @@ proc getTime*(arg: ThreadArg) {.thread.} =
 
 
 proc getBattery*(arg: ThreadArg) {.thread.} =
-  let
-    timeout = initDuration(seconds = 5)
-    battery_names = walkPattern("/sys/class/power_supply/BAT*").toSeq
+  let battery_names = walkPattern("/sys/class/power_supply/BAT*").toSeq
+  var timeout = initDuration(seconds = 5)
+  if arg.savepower:
+    timeout = initDuration(seconds = 10)
   if battery_names.len == 0:
     return
   let battery_name = battery_names[0]
@@ -73,9 +78,10 @@ proc getBattery*(arg: ThreadArg) {.thread.} =
 
 proc getCPU*(arg: ThreadArg) {.thread.} =
   # TODO (?): get CPU-Usage
-  let
-    timeout = initDuration(seconds = 3)
-    zones = walkPattern("/sys/class/thermal/thermal_zone*").toSeq
+  let zones = walkPattern("/sys/class/thermal/thermal_zone*").toSeq
+  var timeout = initDuration(seconds = 3)
+  if arg.savepower:
+    timeout = initDuration(seconds = 6)
   var zone: string
 
   for z in zones:
@@ -99,8 +105,10 @@ proc getCPU*(arg: ThreadArg) {.thread.} =
 
 
 proc getPkgs*(arg: ThreadArg) {.thread.} =
-  let timeout = initDuration(seconds = 20)
   let fileName = "/tmp/available-updates.txt"
+  var timeout = initDuration(seconds = 20)
+  if arg.savepower:
+    timeout = initDuration(minutes = 1)
   if not fileName.fileExists:
     return
   while true:
@@ -116,9 +124,10 @@ proc getPkgs*(arg: ThreadArg) {.thread.} =
 
 
 proc getBacklight*(arg: ThreadArg) {.thread.} =
-  let
-    timeout = initDuration(milliseconds = 250)
-    bldevices = walkPattern("/sys/class/backlight/*").toSeq
+  let bldevices = walkPattern("/sys/class/backlight/*").toSeq
+  var timeout = initDuration(milliseconds = 250)
+  if arg.savepower:
+    timeout = initDuration(seconds = 2)
   if bldevices.len == 0:
     return
   var
@@ -137,8 +146,11 @@ proc getBacklight*(arg: ThreadArg) {.thread.} =
 
 
 proc getVolume*(arg: ThreadArg) {.thread.} =
-  let timeout = initDuration(milliseconds = 250)
-  var mixer = initMixer()
+  var
+    mixer = initMixer()
+    timeout = initDuration(milliseconds = 250)
+  if arg.savepower:
+    timeout = initDuration(seconds = 2)
   if not mixer.good:
     return
   while true:

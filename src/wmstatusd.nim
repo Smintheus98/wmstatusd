@@ -29,18 +29,22 @@ tprocs[volume]    = getVolume
 
 proc resetDefault(config: var Configuration) =
   config.taglist = @[time, date, pkgs, backlight, volume, cpu, battery]
-  config.tagPadding = 1
-  config.colormap[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
+  config.separator = "|"
+  config.separatorColor = CWHITE
+  config.padding = 1
   config.useColors = true
+  config.savepower = false
 
 
 proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[Tag] = @[], debug = false) =
   config.resetDefault()
   config.readConfig()
 
+  var colormap: ColorMap
+  colormap[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
   # paramters overwriting
   if nocolors or not config.useColors:
-    config.colormap[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
+    colormap[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
   if taglist.len != 0:
     config.taglist = taglist
 
@@ -54,7 +58,7 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
   for tag in config.taglist.deduplicate:
     data[tag] = ""
     channels[tag].open()
-    createThread(threads[tag], tprocs[tag], (config.colormap, addr channels[tag]))
+    createThread(threads[tag], tprocs[tag], (colormap, config.savepower, addr channels[tag]))
   sleep delay700
 
   var
@@ -69,8 +73,10 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
     for tag in config.taglist:
       while channels[tag].peek >= 1:
         data[tag] = channels[tag].recv()
-      status &= fmt"{data[tag]}" & " ".repeat(config.tagPadding)
-    
+      let padding = " ".repeat(config.padding)
+      status &= fmt"{data[tag]}"
+      status &= padding & colormap[config.separatorColor] & config.separator & colormap[CRESET] & padding
+
     if status != laststatus:
       if debug:
         echo status
@@ -79,7 +85,10 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
         discard XFlush(dpy)
       laststatus = status
 
-    sleep delay250
+    if config.savepower:
+      sleep delay1000
+    else:
+      sleep delay250
 
   for tag in config.taglist.deduplicate:
     channels[tag].close()
