@@ -2,17 +2,13 @@ import std / [
     strformat,
     strutils,
     sequtils,
-    sugar,
-    options,
 ]
-
 import wmstatusd / [types/all, threadingprocs, sleep, configuration]
-
 import cligen, x11/xlib
 
 
 var
-  config: Configuration
+  conf: Configuration
   data: array[Tag, string]
   tprocs: array[Tag, proc(arg: ThreadArg) {.thread.}]
   channels: ptr array[Tag, Channel[string]]
@@ -27,38 +23,46 @@ tprocs[pkgs]      = getPkgs
 tprocs[backlight] = getBacklight
 tprocs[volume]    = getVolume
 
-proc resetDefault(config: var Configuration) =
-  config.taglist = @[time, date, pkgs, backlight, volume, cpu, battery]
-  config.separator = "|"
-  config.separatorColor = CWHITE
-  config.padding = 1
-  config.useColors = true
-  config.savepower = false
+
+proc resetDefault(conf: var Configuration) =
+  ## Reset default configuration
+  conf.taglist = @[time, date, pkgs, backlight, volume, cpu, battery]
+  conf.separator = "|"
+  conf.separatorColor = CWHITE
+  conf.padding = 1
+  conf.useColors = true
+  conf.savepower = false
 
 
-proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[Tag] = @[], debug = false) =
-  config.resetDefault()
-  config.readConfig()
+proc wmstatusd(taglist: seq[Tag]; nocolors = false; config: string = ""; debug = false) =
+  ## Main procedure
+  # Set default configuration
+  conf.resetDefault()
+  # Read Configuration from file
+  if config == "":
+    conf.readConfig()
+  else:
+    if not config.configFileExists:
+      echo fmt"ERROR: File does not exist: '{config}'"
+      quit QuitFailure
+    conf.readConfig(config)
 
   var colormap: ColorMap
   colormap[CBLACK..CRESET] = ["\e[30m", "\e[31m", "\e[32m", "\e[33m", "\e[34m", "\e[35m", "\e[36m", "\e[37m", "\e[0m"]
   # paramters overwriting
-  if nocolors or not config.useColors:
+  if nocolors or not conf.useColors:
     colormap[CBLACK..CRESET] = ["", "", "", "", "", "", "", "", ""]
   if taglist.len != 0:
-    config.taglist = taglist
-
-  # list of only those elements in tags that are not in removeTag
-  config.taglist = config.taglist.filter(tag => tag notin removeTag)
+    conf.taglist = taglist
 
 
   # allocate non-GC-ed shared memory for channels
   channels = cast[ptr array[Tag, Channel[string]]] (createShared(Channel[string], Tag.items.toSeq.len))
 
-  for tag in config.taglist.deduplicate:
+  for tag in conf.taglist.deduplicate:
     data[tag] = ""
     channels[tag].open()
-    createThread(threads[tag], tprocs[tag], (colormap, config.savepower, addr channels[tag]))
+    createThread(threads[tag], tprocs[tag], (colormap, conf.savepower, addr channels[tag]))
   sleep delay700
 
   var
@@ -66,16 +70,16 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
     status, laststatus: string
 
   if debug:
-    echo fmt"Tags: {config.taglist} ({config.taglist.len}), Threads: {config.taglist.deduplicate.len} (+1)"
+    echo fmt"Tags: {conf.taglist} ({conf.taglist.len}), Threads: {conf.taglist.deduplicate.len} (+1)"
 
   while true:
     status = " "
-    for tag in config.taglist:
+    for tag in conf.taglist:
       while channels[tag].peek >= 1:
         data[tag] = channels[tag].recv()
-      let padding = " ".repeat(config.padding)
+      let padding = " ".repeat(conf.padding)
       status &= fmt"{data[tag]}"
-      status &= padding & colormap[config.separatorColor] & config.separator & colormap[CRESET] & padding
+      status &= padding & colormap[conf.separatorColor] & conf.separator & colormap[CRESET] & padding
 
     if status != laststatus:
       if debug:
@@ -85,12 +89,12 @@ proc wmstatusd(taglist: seq[Tag], nocolors = false, padding = 1, removeTag: seq[
         discard XFlush(dpy)
       laststatus = status
 
-    if config.savepower:
+    if conf.savepower:
       sleep delay1000
     else:
       sleep delay250
 
-  for tag in config.taglist.deduplicate:
+  for tag in conf.taglist.deduplicate:
     channels[tag].close()
   freeShared(channels)
 
