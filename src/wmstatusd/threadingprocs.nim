@@ -63,7 +63,7 @@ proc getBattery*(arg: ThreadArg) {.thread.} =
     var bat_str = "Bat: "
     case battery_status.toLower:
       of "discharging":
-        bat_str &= fmt"{arg.colormap[CRED]}v"
+        bat_str &= fmt"{arg.colormap[CYELLOW]}v"
       of "charging":
         bat_str &= fmt"{arg.colormap[CGREEN]}^"
       of "full", "not charging":
@@ -97,7 +97,7 @@ proc getCPU*(arg: ThreadArg) {.thread.} =
     if temp < 65:
       cpu_str &= arg.colormap[CGREEN]
     else:
-      cpu_str &= arg.colormap[CRED]
+      cpu_str &= arg.colormap[CYELLOW]
     cpu_str &= fmt"{temp}°C{arg.colormap[CRESET]}"
 
     arg.channel[].send(cpu_str)
