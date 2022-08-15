@@ -35,7 +35,7 @@ task installConfig, "Installs config files":
   mkDir dir
   file = dir / "wmstatusd.conf"
   if not file.fileExists:
-    file.writeFile(slurp"./src/wmstatusd.conf.default")
+    file.writeFile(slurp"./src/wmstatusd.conf")
     echo fmt"Created file: '{file}'"
   else:
     echo fmt"File '{file}' already exists"
