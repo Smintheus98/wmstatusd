@@ -13,7 +13,7 @@ const
   TYPE_CONFIGURATION = staticRead("./types/configuration.nim")
 
 
-proc configFileExists(filename: string): bool =
+proc configFileExists*(filename: string): bool =
   return filename.fileExists
 
 
@@ -30,7 +30,7 @@ proc createConfigFile*(overwrite = false): string =
   return file
 
 
-proc readConfig*(config: var Configuration; configFile = "", defaults = "") =
+proc readConfig*(config: var Configuration; configFile = "") =
   var configFile = configFile
   if configFile == "":
     configFile = createConfigFile()

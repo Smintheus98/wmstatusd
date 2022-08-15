@@ -17,20 +17,18 @@ $ wmstatusd date time battery
 The modules currently available are:
  - `time`
  - `date`
- - `pkgs`
+ - `pkgs`   (currently requires an external script which fetches the update list)
  - `backlight`
  - `volume`
- - `cpu`
+ - `cpu`    (currently only shows temperature, will be changed in the furture)
  - `battery`
 
 
 There are some further command line options:
 ```
--h, --help        prints help message
--n, --nocolors    disables colors
--p, --padding=    set costume right padding between the
-                  information modules
--r, --removeTag=  remove tags from module list to display
+-h, --help        print help message
+-n, --nocolors    disable colors
+-c, --config=     use alternative config file
 -d, --debug       redirect program output to stdout
 ```
 
@@ -38,7 +36,7 @@ There are some further command line options:
 ## Installation
 This program is written in the [Nim Programming Language](https://nim-lang.org) so a [Nim](https://github.com/nim-lang/Nim/)-Compiler is required.
 The prefered installation method is using [choosenim](https://github.com/dom96/choosenim).
-(Do not forget to add the nimble binary directory (usually: `~/.nimble/bin`) to your systems path by appending `export PATH=$PATH:$HOME/.nimble/bin` to according configuration file like `~/.bashrc` or `~/.profile`.)
+(Do not forget to add the nimble binary directory (usually: `~/.nimble/bin`) to your system path by appending `export PATH=$PATH:$HOME/.nimble/bin` to according configuration file like `~/.bashrc` or `~/.profile`.)
 
 Clone the repository:
 ```
@@ -67,10 +65,22 @@ The default configuration looks like this:
 ```
 config main:
   taglist = @[time, date, pkgs, backlight, volume, cpu, battery]
-  tagpadding = 1
+  separator = "|"
+  separatorColor = CWHITE
+  padding = 1
   useColors = true
+  savepower = false
 ```
 An invalid configuration will prevent the program from starting.
+
+Details:
+ - taglist: List and order of modules to show.
+ - separator: String of symbols put between the modules information strings.
+ - separatorColor: Color of the separator. May be one of:
+    CBLACK, CRED, CGREEN, CYELLOW, CBLUE, CMAGENTA, CCYAN, CWHITE, CRESET
+ - padding: Number of spaces between information and separator. May be completely replaced by according separator-string.
+ - useColors: Use colored mode.
+ - savepower: Mode affecting the refresh-times so the program consumes less power.
 
 
 ## Todo v1.0.0:
