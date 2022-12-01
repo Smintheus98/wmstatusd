@@ -12,7 +12,7 @@ when not defined(depsOnly):
 
 # Dependencies
 
-requires "nim >= 1.6.2"
+requires "nim >= 1.6.10"
 requires "cligen"
 requires "x11"
 requires "nimscripter"
