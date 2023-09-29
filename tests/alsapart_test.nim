@@ -1,5 +1,5 @@
 import strformat, os
-import ../src/bindings/alsapart
+import ../src/wmstatusd/bindings/alsapart
 
 proc test_classical =
   var
@@ -54,8 +54,7 @@ proc test_classical =
   echo &"Switch: {switch} (" & (if switch == 1: "on" else: "off: mute") & ")"
 
 
-
-import ../src/bindings/amixer
+import ../src/wmstatusd/bindings/amixer
 proc test_advanced() =
   var mixer: Mixer = initMixer()
   if not mixer.good:
