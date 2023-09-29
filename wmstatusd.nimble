@@ -15,7 +15,7 @@ when not defined(depsOnly):
 requires "nim >= 1.6.10"
 requires "cligen"
 requires "x11"
-requires "nimscripter"
+requires "nimscripter >= 1.0.18"
 
 
 # Tasks
