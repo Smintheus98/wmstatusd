@@ -4,6 +4,7 @@ import std / [
     sequtils,
     times,
     os,
+    math,
 ]
 
 import types/all, sleep, locales, bindings/amixer
@@ -139,7 +140,7 @@ proc getBacklight*(arg: ThreadArg) {.thread.} =
   
   while true:
     actual_brightness = readFile(bldevice / "actual_brightness").strip.parseInt
-    backlight_str = fmt"BL: {arg.colormap[CYELLOW]}{(actual_brightness * 100) div max_brightness}%{arg.colormap[CRESET]}"
+    backlight_str = fmt"BL: {arg.colormap[CYELLOW]}{((actual_brightness * 100) / max_brightness).round.int}%{arg.colormap[CRESET]}"
 
     arg.channel[].send(backlight_str)
     sleep timeout
