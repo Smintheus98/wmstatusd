@@ -84,11 +84,7 @@ Details:
 
 
 ## Todo v1.0.0:
- - [X] Replace global writeback variables by using channels (ipc)
- - [X] Remove all system calls in favor of internal soluions
- - [X] Use NimScript configuration file
- - [X] Fix program to use arc garbage collector
+I have decided to give this project of mine a rather extensive make over including the redesign of the software.
+This may or may not include the configuration using NimScript which, while being quite usefull, feels like a pretty heavy dependency.
+ - [ ] Rewrite
  - [ ] Proper code documentation and functionality tests
-
-Currently there are no further functional requirements.
-After some time of testing and improved documentation the repository will be upgraded to version v1.0.0.
