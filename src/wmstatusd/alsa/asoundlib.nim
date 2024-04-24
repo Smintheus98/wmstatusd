@@ -1,5 +1,8 @@
-## This is a partial Nim wrapper for the libasound library
+## This is a partial Nim wrapper for the libasound library (`/usr/include/alsa/mixer.h`).
+## It only provides a low-level interface.
+## For a high-level interface use the `amixer` module!
 
+# shared library name
 const asound* = "libasound.so"
 
 type
@@ -9,20 +12,20 @@ type
   snd_mixer_selem_id* = object
   snd_mixer_selem_regopt* = object
   snd_mixer_selem_channel_id* {.size: sizeof(cint).} = enum
-    SND_MIXER_SCHN_UNKNOWN = -1,                          ## * Front left
-    SND_MIXER_SCHN_FRONT_LEFT = 0,                        ## * Front right
-    SND_MIXER_SCHN_FRONT_RIGHT,                           ## * Rear left
-    SND_MIXER_SCHN_REAR_LEFT,                             ## * Rear right
-    SND_MIXER_SCHN_REAR_RIGHT,                            ## * Front center
-    SND_MIXER_SCHN_FRONT_CENTER,                          ## * Woofer
-    SND_MIXER_SCHN_WOOFER,                                ## * Side Left
-    SND_MIXER_SCHN_SIDE_LEFT,                             ## * Side Right
-    SND_MIXER_SCHN_SIDE_RIGHT,                            ## * Rear Center
-    SND_MIXER_SCHN_REAR_CENTER,
-    SND_MIXER_SCHN_LAST = 31                              ## * Mono (Front left alias)
+    SND_MIXER_SCHN_UNKNOWN = -1,
+    SND_MIXER_SCHN_FRONT_LEFT = 0,                  # Front left
+    SND_MIXER_SCHN_FRONT_RIGHT,                     # Front right
+    SND_MIXER_SCHN_REAR_LEFT,                       # Rear left
+    SND_MIXER_SCHN_REAR_RIGHT,                      # Rear right
+    SND_MIXER_SCHN_FRONT_CENTER,                    # Front center
+    SND_MIXER_SCHN_WOOFER,                          # Woofer
+    SND_MIXER_SCHN_SIDE_LEFT,                       # Side Left
+    SND_MIXER_SCHN_SIDE_RIGHT,                      # Side Right
+    SND_MIXER_SCHN_REAR_CENTER,                     # Rear Center
+    SND_MIXER_SCHN_LAST = 31
 
 const
-  SND_MIXER_SCHN_MONO* = SND_MIXER_SCHN_FRONT_LEFT
+  SND_MIXER_SCHN_MONO* = SND_MIXER_SCHN_FRONT_LEFT  # Mono (Front left alias)
 
 
 
@@ -49,6 +52,10 @@ proc snd_mixer_find_selem*(mixer: ptr snd_mixer; id: ptr snd_mixer_selem_id): pt
 proc snd_mixer_selem_get_playback_volume_range*(elem: ptr snd_mixer_elem; min: ptr clong; max: ptr clong): cint 
 proc snd_mixer_selem_get_playback_switch*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr cint): cint 
 proc snd_mixer_selem_get_playback_volume*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr clong): cint 
+
+proc snd_mixer_selem_get_capture_volume_range*(elem: ptr snd_mixer_elem; min: ptr clong; max: ptr clong): cint
+proc snd_mixer_selem_get_capture_switch*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr cint): cint
+proc snd_mixer_selem_get_capture_volume*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr clong): cint
 
 {.pop.}
 
@@ -131,10 +138,8 @@ proc snd_mixer_selem_ask_playback_vol_dB*(elem: ptr snd_mixer_elem; value: clong
 proc snd_mixer_selem_ask_capture_vol_dB*(elem: ptr snd_mixer_elem; value: clong; dBvalue: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_ask_capture_vol_dB", dynlib: asound.}
 proc snd_mixer_selem_ask_playback_dB_vol*(elem: ptr snd_mixer_elem; dBvalue: clong; dir: cint; value: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_ask_playback_dB_vol", dynlib: asound.}
 proc snd_mixer_selem_ask_capture_dB_vol*(elem: ptr snd_mixer_elem; dBvalue: clong; dir: cint; value: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_ask_capture_dB_vol", dynlib: asound.}
-proc snd_mixer_selem_get_capture_volume*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_get_capture_volume", dynlib: asound.}
 proc snd_mixer_selem_get_playback_dB*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_get_playback_dB", dynlib: asound.}
 proc snd_mixer_selem_get_capture_dB*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_get_capture_dB", dynlib: asound.}
-proc snd_mixer_selem_get_capture_switch*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: ptr cint): cint {.cdecl, importc: "snd_mixer_selem_get_capture_switch", dynlib: asound.}
 proc snd_mixer_selem_set_playback_volume*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: clong): cint {.cdecl, importc: "snd_mixer_selem_set_playback_volume", dynlib: asound.}
 proc snd_mixer_selem_set_capture_volume*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: clong): cint {.cdecl, importc: "snd_mixer_selem_set_capture_volume", dynlib: asound.}
 proc snd_mixer_selem_set_playback_dB*(elem: ptr snd_mixer_elem; channel: snd_mixer_selem_channel_id; value: clong; dir: cint): cint {.cdecl, importc: "snd_mixer_selem_set_playback_dB", dynlib: asound.}
@@ -149,7 +154,6 @@ proc snd_mixer_selem_set_playback_switch_all*(elem: ptr snd_mixer_elem; value: c
 proc snd_mixer_selem_set_capture_switch_all*(elem: ptr snd_mixer_elem; value: cint): cint {. cdecl, importc: "snd_mixer_selem_set_capture_switch_all", dynlib: asound.}
 proc snd_mixer_selem_get_playback_dB_range*(elem: ptr snd_mixer_elem; min: ptr clong; max: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_get_playback_dB_range", dynlib: asound.}
 proc snd_mixer_selem_set_playback_volume_range*(elem: ptr snd_mixer_elem; min: clong; max: clong): cint {.cdecl, importc: "snd_mixer_selem_set_playback_volume_range", dynlib: asound.}
-proc snd_mixer_selem_get_capture_volume_range*(elem: ptr snd_mixer_elem; min: ptr clong; max: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_get_capture_volume_range", dynlib: asound.}
 proc snd_mixer_selem_get_capture_dB_range*(elem: ptr snd_mixer_elem; min: ptr clong; max: ptr clong): cint {.cdecl, importc: "snd_mixer_selem_get_capture_dB_range", dynlib: asound.}
 proc snd_mixer_selem_set_capture_volume_range*(elem: ptr snd_mixer_elem; min: clong; max: clong): cint {.cdecl, importc: "snd_mixer_selem_set_capture_volume_range", dynlib: asound.}
 proc snd_mixer_selem_is_enumerated*(elem: ptr snd_mixer_elem): cint {.cdecl, importc: "snd_mixer_selem_is_enumerated", dynlib: asound.}

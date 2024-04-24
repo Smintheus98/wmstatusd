@@ -1,0 +1,25 @@
+src
+├── wmstatusd
+│   ├── alsa    # Iteration 1 done!
+│   │   ├── asoundlib.nim
+│   │   └── amixer.nim
+│   ├── configuration.nim
+│   ├── locales.nim
+│   ├A─ modules
+│   │   ├── backlight.nim
+│   │   ├── battery_level.nim
+│   │   ├── cpu_temperature.nim
+│   │   ├── date.nim
+│   │   ├── audio_volume.nim
+│   │   ├── capture_volume.nim
+│   │   └── ...
+│   ├C─ sleep.nim -> utils.nim
+│   ├X─ threadingprocs.nim -> modules
+│   └── types
+│       ├── all.nim
+│       ├── colors.nim
+│       ├── configuration.nim
+│       ├── tags.nim -> "read at compile time" (?)
+│       └── threadargs.nim
+├── wmstatusd.conf
+└── wmstatusd.nim
