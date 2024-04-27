@@ -43,12 +43,7 @@ proc deinit*(mixer: var Mixer) =
     mixer.sid = nil
 
 
-proc `=destroy`(mixer: var Mixer) =
-  ## Destructor to clear the object and free all its resources
-  mixer.deinit
-
-
-proc init*(mixer: var Mixer; mixIdx = 0; mixKind = Master; cardName = "default") =
+proc init*(mixer: var Mixer; mixKind = Master; mixIdx = 0; cardName = "default") =
   ## In-place init procedure
   let mixIdx = mixIdx.cuint
 
@@ -64,7 +59,7 @@ proc init*(mixer: var Mixer; mixIdx = 0; mixKind = Master; cardName = "default")
 
   # set mixer name and index
   mixer.mixKind = mixKind
-  snd_mixer_selem_id_set_name(mixer.sid, $mixKind)
+  snd_mixer_selem_id_set_name(mixer.sid, ($mixKind).cstring)
   snd_mixer_selem_id_set_index(mixer.sid, mixIdx)
 
   # try to open the mixer handle, attach a card, register it and finally load it
@@ -90,9 +85,9 @@ proc init*(mixer: var Mixer; mixIdx = 0; mixKind = Master; cardName = "default")
   mixer.good = true
 
 
-proc initMixer*(mixIdx = 0; mixKind = Master; cardName = "default"): Mixer =
+proc initMixer*(mixKind = Master; mixIdx = 0; cardName = "default"): Mixer =
   ## Constructor
-  result.init(mixIdx, mixKind, cardName)
+  result.init(mixKind, mixIdx, cardName)
 
 
 proc update*(mixer: var Mixer): bool =

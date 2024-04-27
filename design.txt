@@ -3,23 +3,27 @@ src
 │   ├── alsa    # Iteration 1 done!
 │   │   ├── asoundlib.nim
 │   │   └── amixer.nim
-│   ├── configuration.nim
-│   ├── locales.nim
-│   ├A─ modules
-│   │   ├── backlight.nim
-│   │   ├── battery_level.nim
-│   │   ├── cpu_temperature.nim
-│   │   ├── date.nim
-│   │   ├── audio_volume.nim
-│   │   ├── capture_volume.nim
+│   ├?─ config
+│   │   ├── configure.nim
+│   │   ├── confdef.nim
+│   │   ├── confparse.nim
 │   │   └── ...
-│   ├C─ sleep.nim -> utils.nim
-│   ├X─ threadingprocs.nim -> modules
-│   └── types
-│       ├── all.nim
-│       ├── colors.nim
-│       ├── configuration.nim
-│       ├── tags.nim -> "read at compile time" (?)
-│       └── threadargs.nim
+│   ├A─ modules # Iteration 1 done!
+│   │   ├── all.nim
+│   │   ├── backlight.nim
+│   │   ├── battery.nim
+│   │   ├── cputemp.nim
+│   │   ├── date.nim
+│   │   ├── mic.nim
+│   │   ├── time.nim
+│   │   ├── volume.nim
+│   │   └── ...
+│   └── utils   # Iteration 2 done! - extended as necessary
+│       ├── colors.nim  
+│       ├── locales.nim
+│       ├── statusbar.nim
+│       ├── threadutils.nim
+│       └── timeutils.nim
 ├── wmstatusd.conf
-└── wmstatusd.nim
+├T─ test_main.nim
+└R─ wmstatusd.nim

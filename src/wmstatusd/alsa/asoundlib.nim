@@ -29,7 +29,7 @@ const
 
 
 
-{.push cdecl, importc, dynlib: asound.}
+{.push cdecl, gcsafe, importc, dynlib: asound.}
 
 proc snd_mixer_open*(mixer: ptr ptr snd_mixer; mode: cint): cint
 proc snd_mixer_close*(mixer: ptr snd_mixer): cint
