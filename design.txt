@@ -1,6 +1,6 @@
 src
 ├── wmstatusd
-│   ├── alsa    # Iteration 1 done!
+│   ├── alsa    # Iteration 2 done!
 │   │   ├── asoundlib.nim
 │   │   └── amixer.nim
 │   ├?─ config
@@ -8,7 +8,7 @@ src
 │   │   ├── confdef.nim
 │   │   ├── confparse.nim
 │   │   └── ...
-│   ├A─ modules # Iteration 1 done!
+│   ├A─ modules # Iteration 2 done!
 │   │   ├── all.nim
 │   │   ├── backlight.nim
 │   │   ├── battery.nim

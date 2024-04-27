@@ -1,13 +1,13 @@
 import ../utils/threadutils
 export threadutils
 
-import backlight as backlight_mod
-import battery as battery_mod
-import cputemp as cputemp_mod
-import date as date_mod
-import mic as mic_mod
-import time as time_mod
-import volume as volume_mod
+import mod_backlight
+import mod_battery
+import mod_cputemp
+import mod_date
+import mod_mic
+import mod_time
+import mod_volume
 
 type Tag* = enum
   backlight
@@ -18,12 +18,14 @@ type Tag* = enum
   time
   volume
 
-var moduleProcs*: array[Tag, proc(args: Args) {.thread.}]
-moduleProcs[backlight] = backlight_mod.backlight
-moduleProcs[battery] = battery_mod.battery
-moduleProcs[cputemp] = cputemp_mod.cputemp
-moduleProcs[date] = date_mod.date
-moduleProcs[mic] = mic_mod.mic
-moduleProcs[time] = time_mod.time
-moduleProcs[volume] = volume_mod.volume
+let moduleProcs*: array[Tag, proc(args: Args) {.thread.}] =
+  [
+    backlight: mod_backlight.backlight,
+    battery:   mod_battery.battery,
+    cputemp:   mod_cputemp.cputemp,
+    date:      mod_date.date,
+    mic:       mod_mic.mic,
+    time:      mod_time.time,
+    volume:    mod_volume.volume,
+  ]
 
