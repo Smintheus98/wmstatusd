@@ -1,4 +1,4 @@
-import x11/xlib
+import pkg/x11/xlib
 
 type StatusBar* = object
   display: PDisplay = nil
