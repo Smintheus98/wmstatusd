@@ -12,30 +12,32 @@ when not defined(depsOnly):
 
 # Dependencies
 
-requires "nim >= 1.6.10"
-requires "cligen"
+requires "nim >= 2.0.4"
+#requires "cligen"
+requires "simpleparseopt >= 1.1.1"
 requires "x11"
-requires "nimscripter >= 1.0.18"
+requires "nimscripter >= 1.1.5"
 
 
 # Tasks
 
-import os, strformat
+import os
 
 task installConfig, "Installs config files":
-  var dir, file: string
   let
     xdgConfigHome = "XDG_CONFIG_HOME".getEnv
     homeUserConfig = getHomeDir() / ".config"
-  if xdgConfigHome != "":
-    dir = xdgConfigHome / "wmstatusd"
-  else:
-    dir = homeUserConfig / "wmstatusd"
-
+  let dir =
+      if xdgConfigHome != "":
+        xdgConfigHome / "wmstatusd"
+      else:
+        homeUserConfig / "wmstatusd"
   mkDir dir
-  file = dir / "wmstatusd.conf"
+
+  let file = dir / "wmstatusd.conf"
+
   if not file.fileExists:
     file.writeFile(slurp"./src/wmstatusd.conf")
-    echo fmt"Created file: '{file}'"
+    echo "Created file: '" & file & "'"
   else:
-    echo fmt"File '{file}' already exists"
+    echo "File '" & file & "' already exists"
