@@ -8,6 +8,8 @@ src
 │   │   ├── confdef.nim
 │   │   ├── confparse.nim
 │   │   └── ...
+│   ├A─ cli     # Iteration 1 done!
+│   │   └── cliparse
 │   ├A─ modules # Iteration 2 done!
 │   │   ├── all.nim
 │   │   ├── backlight.nim
