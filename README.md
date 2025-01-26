@@ -17,19 +17,21 @@ $ wmstatusd date time battery
 The modules currently available are:
  - `time`
  - `date`
- - `pkgs`   (currently requires an external script which fetches the update list)
  - `backlight`
  - `volume`
+ - `mic`
  - `cpu`    (currently only shows temperature, will be changed in the furture)
  - `battery`
 
 
 There are some further command line options:
 ```
--h, --help        print help message
--n, --nocolors    disable colors
--c, --config=     use alternative config file
--d, --debug       redirect program output to stdout
+--help, -h         print help message
+--colors, -c       enable colors
+--no-colors        disable colors
+--config, -C       alternative config file
+--debug, -d        debug mode
+--list-tags, -l    list available tags
 ```
 
 
@@ -61,30 +63,42 @@ This requirement will probably be removed in a future release.
 ## Configuration
 The program can be configured by a NimScript file placed at `$XDG_CONFIG_HOME/wmstatusd/wmstatusd.conf`. If `XDG_CONFIG_HOME` is not defined the program defaults to `~/.config/wmstatusd/wmstatusd.conf`.
 If the file does not exist, the program installs a default file automatically.
+An invalid configuration will prevent the program from starting.
+
 The default configuration looks like this:
 ```
 config main:
-  taglist = @[time, date, pkgs, backlight, volume, cpu, battery]
+  tags = @[time, date, backlight, volume, mic, cputemp, battery]
   separator = "|"
   separatorColor = CWHITE
   padding = 1
   useColors = true
   savepower = false
+  locale = en_US
 ```
-An invalid configuration will prevent the program from starting.
+It makes use of the macro `config` without which the variable assignments would have to look like this:
+```
+main.tags = @[time, date, backlight, volume, mic, cputemp, battery]
+```
 
 Details:
- - taglist: List and order of modules to show.
+ - tags: List and order of modules to show.
  - separator: String of symbols put between the modules information strings.
  - separatorColor: Color of the separator. May be one of:
-    CBLACK, CRED, CGREEN, CYELLOW, CBLUE, CMAGENTA, CCYAN, CWHITE, CRESET
+    `CBLACK`, `CRED`, `CGREEN`, `CYELLOW`, `CBLUE`, `CMAGENTA`, `CCYAN`, `CWHITE`, `CRESET`
  - padding: Number of spaces between information and separator. May be completely replaced by according separator-string.
  - useColors: Use colored mode.
  - savepower: Mode affecting the refresh-times so the program consumes less power.
+ - locale: locale to use for modules like `date`. May be one of:
+    `en_US`, `de_DE`
 
+Since the configuration file is pure NimScript it is possible to embed scripts or make the configuration depending on the actual system and its capabilities
 
 ## Todo v1.0.0:
 I have decided to give this project of mine a rather extensive make over including the redesign of the software.
 This may or may not include the configuration using NimScript which, while being quite usefull, feels like a pretty heavy dependency.
- - [ ] Rewrite
+ - [x] Rewrite
+ - [ ] centralize configuration with the different config-styles (file config, cli config, thread config)
+ - [ ] extend and rename colors (256-colors)
+ - [ ] add module cpu(-usage)
  - [ ] Proper code documentation and functionality tests
