@@ -1,8 +1,8 @@
 # Package
 
-version       = "0.2.3"
+version       = "0.4.0"
 author        = "Yannic Kitten"
-description   = "Status daemon for window managers"
+description   = "Status daemon for window manager"
 license       = "GPL-3.0"
 srcDir        = "src"
 when not defined(depsOnly):
@@ -12,7 +12,7 @@ when not defined(depsOnly):
 
 # Dependencies
 
-requires "nim >= 2.0.4"
+requires "nim >= 2.0.14"
 #requires "cligen"
 requires "simpleparseopt >= 1.1.1"
 requires "x11"
