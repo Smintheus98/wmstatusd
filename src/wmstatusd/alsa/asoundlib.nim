@@ -1,6 +1,8 @@
 ## This is a partial Nim wrapper for the libasound library (`/usr/include/alsa/mixer.h`).
 ## It only provides a low-level interface.
 ## For a high-level interface use the `amixer` module!
+## NOTE: this module requires an installation of the alsa library including development files
+##       something like: alsa-devel, libasound-dev
 
 # shared library name
 const asound* = "libasound.so"

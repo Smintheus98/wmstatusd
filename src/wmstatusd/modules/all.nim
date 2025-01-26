@@ -1,5 +1,7 @@
-import ../utils/threadutils
-export threadutils
+import threadingtools
+export threadingtools
+
+# TODO: This file could be much more elegant if it used some meta programming!
 
 import mod_backlight
 import mod_battery
@@ -18,7 +20,7 @@ type Tag* = enum
   time
   volume
 
-let moduleProcs*: array[Tag, proc(args: Args) {.thread.}] =
+let moduleProcs*: array[Tag, proc(args: ModuleArgs) {.thread.}] =
   [
     backlight: mod_backlight.backlight,
     battery:   mod_battery.battery,

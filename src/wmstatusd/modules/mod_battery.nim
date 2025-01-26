@@ -1,5 +1,6 @@
 import std/[os, sequtils, strutils]
-import ../utils/[threadutils, colors, timeutils]
+import threadingtools
+import ../utils/[colors, timeutils]
 
 const tag* = "battery"
 
@@ -11,7 +12,7 @@ proc getBatName(): string {.inline.} =
     return bat_names[0]
   return ""
 
-proc battery*(args: Args) {.thread.} =
+proc battery*(args: ModuleArgs) {.thread.} =
   let timeout =
       if args.savepower: 10'sec
       else:               5'sec
@@ -33,7 +34,7 @@ proc battery*(args: Args) {.thread.} =
           else:                      (CYELLOW, ">")
 
     args.channel[].send(
-        if args.useColor: "Bat: " & $color & symbol & bat_level & "%" & $CRESET
+        if args.useColor: "Bat: " & color.str & symbol & bat_level & "%" & CRESET.str
         else:             "Bat: " & symbol & bat_level & "%"
     )
 

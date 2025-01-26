@@ -1,5 +1,6 @@
 import std/[os, sequtils, strutils]
-import ../utils/[threadutils, colors, timeutils]
+import threadingtools
+import ../utils/[colors, timeutils]
 
 const tag* = "cputemp"
 
@@ -12,7 +13,7 @@ proc getZoneName(zone_type = "x86_pkg_temp"): string {.inline.} =
       return zone
   return ""
 
-proc cputemp*(args: Args) {.thread.} =
+proc cputemp*(args: ModuleArgs) {.thread.} =
   # TODO (?): get CPU-Usage
   let timeout =
       if args.savepower: 6'sec
@@ -30,7 +31,7 @@ proc cputemp*(args: Args) {.thread.} =
         else:            CYELLOW
 
     args.channel[].send(
-        if args.useColor: "CPU: " & $color & $temp_dC & "°C" & $CRESET
+        if args.useColor: "CPU: " & color.str & $temp_dC & "°C" & CRESET.str
         else:             "CPU: " & $temp_dC & "°C"
     )
 

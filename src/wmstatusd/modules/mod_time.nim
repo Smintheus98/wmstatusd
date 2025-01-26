@@ -1,9 +1,10 @@
 import std/times
-import ../utils/[threadutils, colors, timeutils]
+import threadingtools
+import ../utils/[colors, timeutils]
 
 const tag* = "time"
 
-proc time*(args: Args) {.thread.} =
+proc time*(args: ModuleArgs) {.thread.} =
   let timeout =
       if args.savepower: 30'sec
       else:              15'sec
@@ -13,7 +14,7 @@ proc time*(args: Args) {.thread.} =
     let pred_dur = durNextMin(curr_time)
 
     args.channel[].send(
-        if args.useColor: "Time: " & $CWHITE & curr_time.format("HH:mm") & $CRESET
+        if args.useColor: "Time: " & CWHITE.str & curr_time.format("HH:mm") & CRESET.str
         else:             "Time: " & curr_time.format("HH:mm")
     )
 

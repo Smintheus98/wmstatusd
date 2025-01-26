@@ -1,5 +1,6 @@
 import std/[os, sequtils, strutils, math]
-import ../utils/[threadutils, colors, timeutils]
+import threadingtools
+import ../utils/[colors, timeutils]
 
 const tag* = "backlight"
 
@@ -11,9 +12,9 @@ proc getBlDevice(): string =
     return blDevices[0]
   return ""
 
-proc backlight*(args: Args) {.thread.} =
+proc backlight*(args: ModuleArgs) {.thread.} =
   let timeout =
-      if args.savepower: 2'sec
+      if args.savepower:   2'sec
       else:              250'ms
 
   let blDevice = getBlDevice()
@@ -27,7 +28,7 @@ proc backlight*(args: Args) {.thread.} =
     let perc_brightness = ((actual_brightness * 100) / max_brightness).round.int
 
     args.channel[].send(
-        if args.useColor: "BL: " & $CYELLOW & $perc_brightness & "%" & $CRESET
+        if args.useColor: "BL: " & CYELLOW.str & $perc_brightness & "%" & CRESET.str
         else:             "BL: " & $perc_brightness & "%"
     )
 

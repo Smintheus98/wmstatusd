@@ -3,7 +3,7 @@ import std/times
 type Locale* = enum
   en_US, de_DE
 
-# unmutable collection of locales
+# immutable collection of locales
 const locales*: array[Locale, DateTimeLocale] =
   [
     en_US: DefaultLocale,
