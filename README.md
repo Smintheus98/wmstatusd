@@ -50,14 +50,18 @@ After installation of Nim use:
 ```
 $ nimble install
 ```
-to install the programs dependencies and compile and install the program afterwards.
+to install the programs (nim based) dependencies and compile and install the program afterwards.
 
 The program will be installed to `$HOME/.nimble/bin`.
 Make sure to include that directory into your system path.
-For explicit instructions see beginning of this section.
+For explicit instructions see start of this section.
 
 For the configuration via the NimScript file it is currently required having a recent installation of the nim compiler on the system.
 This requirement will probably be removed in a future release.
+
+### Troubleshooting
+You may be required to install the development files of the `asound` library manually.
+A likely package name might be: `libasound2-dev`
 
 
 ## Configuration
