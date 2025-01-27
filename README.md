@@ -37,7 +37,7 @@ There are some further command line options:
 
 ## Installation
 This program is written in the [Nim Programming Language](https://nim-lang.org) so a [Nim](https://github.com/nim-lang/Nim/)-Compiler is required.
-The prefered installation method is using [choosenim](https://github.com/dom96/choosenim).
+The prefered installation method is using [choosenim](https://github.com/nim-lang/choosenim). 
 (Do not forget to add the nimble binary directory (usually: `~/.nimble/bin`) to your system path by appending `export PATH=$PATH:$HOME/.nimble/bin` to according configuration file like `~/.bashrc` or `~/.profile`.)
 
 Clone the repository:
