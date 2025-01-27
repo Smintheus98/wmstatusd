@@ -1,5 +1,5 @@
 # wmstatusd
-Daemon to show status information in the bar of some Window Manager like dwm or nimdow
+Daemon to show status information in the bar of some Window Manager like [dwm](https://dwm.suckless.org/) or [nimdow](https://github.com/avahe-kellenberger/nimdow)
 
 
 ## Usage
