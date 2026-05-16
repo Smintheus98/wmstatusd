@@ -14,7 +14,7 @@ when not defined(depsOnly):
 
 requires "nim >= 2.0.14"
 #requires "cligen"
-requires "simpleparseopt >= 1.1.1"
+requires "simple_parseopt >= 1.1.1"
 requires "x11"
 requires "nimscripter >= 1.1.5"
 
