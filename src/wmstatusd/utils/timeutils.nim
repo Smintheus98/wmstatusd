@@ -18,15 +18,28 @@ proc `'ms`*(lit: string): Duration =
 
 
 proc durNextMin*(t_start: DateTime): Duration =
-  var t_end = t_start + initDuration(minutes = 1)
-  t_end.nanosecond = 0
-  t_end.second = 0
-  return t_end - t_start
+  const
+    total_ns = 1_000_000_000
+    total_sec = 60
+  let
+    remain_ns  = total_ns - t_start.nanosecond
+    remain_sec = total_sec - t_start.second - 1
+  initDuration(seconds = remain_sec, nanoseconds = remain_ns)
 
 proc durNextDay*(t_start: DateTime): Duration =
-  var t_end = t_start + initDuration(days = 1)
-  t_end.nanosecond = 0
-  t_end.second = 0
-  t_end.minute = 0
-  t_end.hour = 0
-  return t_end - t_start
+  const
+    total_ns = 1_000_000_000
+    total_sec = 60
+    total_min = 60
+    total_h = 24
+  let
+    remain_ns  = total_ns - t_start.nanosecond
+    remain_sec = total_sec - t_start.second - 1
+    remain_min = total_min - t_start.minute - 1
+    remain_h   = total_h - t_start.hour - 1
+  initDuration(
+      hours = remain_h,
+      minutes = remain_min,
+      seconds = remain_sec,
+      nanoseconds = remain_ns)
+
