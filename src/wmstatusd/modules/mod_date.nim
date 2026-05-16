@@ -5,7 +5,7 @@ import ../utils/[colors, timeutils, locales]
 const tag* = "date"
 
 proc date*(args: ModuleArgs) {.thread.} =
-  let timeout =
+  let timeout = # necessary to correct artefacts from system suspension
       if args.savepower: 30'min
       else:               5'min
   let locale = locales[args.locale]

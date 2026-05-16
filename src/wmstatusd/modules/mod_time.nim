@@ -5,7 +5,7 @@ import ../utils/[colors, timeutils]
 const tag* = "time"
 
 proc time*(args: ModuleArgs) {.thread.} =
-  let timeout =
+  let timeout = # necessary to correct artefacts from system suspension
       if args.savepower: 30'sec
       else:              15'sec
 
