@@ -1,4 +1,4 @@
-import std/[os, sequtils, strutils, math]
+import std/[sequtils, strutils, math]
 import threadingtools
 import ../utils/[colors, timeutils]
 
