@@ -5,6 +5,7 @@ export threadingtools
 
 import mod_backlight
 import mod_battery
+import mod_cpuload
 import mod_cputemp
 import mod_date
 import mod_mic
@@ -14,6 +15,7 @@ import mod_volume
 type Tag* = enum
   backlight
   battery
+  cpuload
   cputemp
   date
   mic
@@ -24,6 +26,7 @@ let moduleProcs*: array[Tag, proc(args: ModuleArgs) {.thread.}] =
   [
     backlight: mod_backlight.backlight,
     battery:   mod_battery.battery,
+    cpuload:   mod_cpuload.cpuload,
     cputemp:   mod_cputemp.cputemp,
     date:      mod_date.date,
     mic:       mod_mic.mic,

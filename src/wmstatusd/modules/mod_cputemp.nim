@@ -31,8 +31,8 @@ proc cputemp*(args: ModuleArgs) {.thread.} =
         else:            CYELLOW
 
     args.channel[].send(
-        if args.useColor: "CPU: " & color.str & $temp_dC & "°C" & CRESET.str
-        else:             "CPU: " & $temp_dC & "°C"
+        if args.useColor: "Temp: " & color.str & $temp_dC & "°C" & CRESET.str
+        else:             "Temp: " & $temp_dC & "°C"
     )
 
     sleep timeout
