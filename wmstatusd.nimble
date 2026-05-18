@@ -25,19 +25,11 @@ import os
 
 task installConfig, "Installs config files":
   let
-    xdgConfigHome = "XDG_CONFIG_HOME".getEnv
-    homeUserConfig = getHomeDir() / ".config"
-  let dir =
-      if xdgConfigHome != "":
-        xdgConfigHome / "wmstatusd"
-      else:
-        homeUserConfig / "wmstatusd"
+    dir = "XDG_CONFIG_HOME".getEnv(default = getHomeDir() / ".config") / "wmstatusd"
+    file = dir / "wmstatusd.conf"
   mkDir dir
-
-  let file = dir / "wmstatusd.conf"
-
   if not file.fileExists:
-    file.writeFile(slurp"./src/wmstatusd.conf")
+    cpFile("./src/wmstatusd.conf", file)
     echo "Created file: '" & file & "'"
   else:
-    echo "File '" & file & "' already exists"
+    echo "File '" & file & "' already exists. Abort."
