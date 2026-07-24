@@ -17,12 +17,12 @@ proc mic*(args: ModuleArgs) {.thread.} =
     if not mixer.update():
       break
     let volume = mixer.getVolume()
-    let mute_or_vol =
-        if mixer.isMuted(): "mute"
-        else:               $volume & "%"
+    let (color, mute_or_vol) =
+        if mixer.isMuted(): (CYELLOW, "mute")
+        else:               (CYELLOW_BRIGHT, $volume & "%")
 
     args.channel[].send(
-        if args.useColor: "Mic: " & CYELLOW.str & mute_or_vol & CRESET.str
+        if args.useColor: "Mic: " & color.str & mute_or_vol & CRESET.str
         else:             "Mic: " & mute_or_vol
     )
 

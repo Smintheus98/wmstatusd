@@ -15,7 +15,7 @@ proc date*(args: ModuleArgs) {.thread.} =
     let pred_dur = durNextDay(curr_time)
 
     args.channel[].send(
-        if args.useColor: "Date: " & CWHITE.str & curr_time.format("ddd dd'.'MM'.'yyyy", locale) & CRESET.str
+        if args.useColor: "Date: " & CWHITE_BRIGHT.str & curr_time.format("ddd dd'.'MM'.'yyyy", locale) & CRESET.str
         else:             "Date: " & curr_time.format("ddd dd'.'MM'.'yyyy", locale)
     )
 

@@ -14,7 +14,7 @@ proc time*(args: ModuleArgs) {.thread.} =
     let pred_dur = durNextMin(curr_time)
 
     args.channel[].send(
-        if args.useColor: "Time: " & CWHITE.str & curr_time.format("HH:mm") & CRESET.str
+        if args.useColor: "Time: " & CWHITE_BRIGHT.str & curr_time.format("HH:mm") & CRESET.str
         else:             "Time: " & curr_time.format("HH:mm")
     )
 

@@ -49,8 +49,8 @@ proc cpuload*(args: ModuleArgs) {.thread.} =
 
     let color =
         if load < 60:   CGREEN
-        elif load < 90: CYELLOW
-        else:           CRED
+        elif load < 90: CYELLOW_BRIGHT
+        else:           CRED_BRIGHT
 
     args.channel[].send(
         if args.useColor: "CPU: " & color.str & $load & "%" & CRESET.str

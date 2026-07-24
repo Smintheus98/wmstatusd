@@ -26,9 +26,14 @@ proc battery*(args: ModuleArgs) {.thread.} =
       bat_level = readFile(bat_name / "capacity").strip
       bat_status = readFile(bat_name / "status").strip
 
+    let discharging_col =
+      if bat_level.parseInt < 30: CYELLOW_BRIGHT
+      elif bat_level.parseInt < 15: CRED_BRIGHT
+      else: CYELLOW
+
     let (color, symbol) =
         case bat_status.toLower:
-          of "discharging":          (CYELLOW, "v")
+          of "discharging":          (discharging_col, "v")
           of "charging":             (CGREEN,  "^")
           of "full", "not charging": (CGREEN,  "=")
           else:                      (CYELLOW, ">")

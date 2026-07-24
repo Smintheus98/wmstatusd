@@ -28,7 +28,7 @@ proc cputemp*(args: ModuleArgs) {.thread.} =
 
     let color =
         if temp_dC < 65: CGREEN
-        else:            CYELLOW
+        else:            CYELLOW_BRIGHT
 
     args.channel[].send(
         if args.useColor: "Temp: " & color.str & $temp_dC & "°C" & CRESET.str
